@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import { cartActions } from '../../store/cart';
+import { cartActions } from '../../store/cartSlice';
 import ProductItem from './ProductItem';
 import classes from './Products.module.css';
 import DUMMY_ITEMS from '../../store/dummyItems';

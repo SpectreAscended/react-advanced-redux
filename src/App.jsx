@@ -4,7 +4,7 @@ import Layout from './components/Layout/Layout';
 import Products from './components/Shop/Products';
 
 function App() {
-  const cartOpen = useSelector(state => state.cart.cartOpen);
+  const cartOpen = useSelector(state => state.ui.cartOpen);
 
   return (
     <Layout>
