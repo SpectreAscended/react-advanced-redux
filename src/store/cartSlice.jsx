@@ -1,4 +1,5 @@
-import { createSlice, current } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import { uiActions } from './uiSlice';
 
 const initialCartState = {
   items: [],
@@ -46,6 +47,60 @@ const cartSlice = createSlice({
     },
   },
 });
+
+// Thunk - A function that delays an action until later.
+// An action creater function that does NOT return the action itself but another function which eventually returns the action
+
+// You CANNOT have asynchronous code, or code the creates a side effect inside of a reducer.  We can, however, write one outside of the reducer within our slice.
+
+// When using redux toolkit we CAN pass a function that returns another function as an action.  This is built into redux when using redux toolkit.
+
+export const sendCartData = cart => {
+  return async dispatch => {
+    dispatch(
+      uiActions.showNotification({
+        status: 'pending',
+        title: 'Sending...',
+        message: 'Sending cart data',
+      })
+    );
+
+    const sendRequest = async () => {
+      const res = await fetch(
+        'https://react-redux-f738e-default-rtdb.firebaseio.com/cart.json',
+        {
+          method: 'PUT',
+          body: JSON.stringify(cart),
+          headers: {
+            'Content-type': 'application/json',
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error('Sending cart data failed.');
+    };
+
+    try {
+      await sendRequest();
+
+      dispatch(
+        uiActions.showNotification({
+          status: 'success',
+          title: 'Success',
+          message: 'Sent cart data successfully',
+        })
+      );
+    } catch (err) {
+      dispatch(
+        uiActions.showNotification({
+          status: 'error',
+          tittle: 'Error.',
+          message: 'Sending cart data failed',
+        })
+      );
+    }
+  };
+};
 
 export const cartActions = cartSlice.actions;
 
