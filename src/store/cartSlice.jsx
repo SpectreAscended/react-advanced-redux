@@ -1,21 +1,26 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { uiActions } from './uiSlice';
 
 const initialCartState = {
   items: [],
   totalAmount: 0,
+  changed: false,
 };
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState: initialCartState,
   reducers: {
+    replaceCart(state, action) {
+      state.totalAmount = action.payload.totalAmount;
+      state.items = action.payload.items;
+    },
     addItem(state, action) {
       const newItem = action.payload;
 
       const existingItem = state.items.find(item => item.id === newItem.id);
 
       state.totalAmount++;
+      state.changed = true;
 
       if (!existingItem) {
         state.items.push({
@@ -37,6 +42,7 @@ const cartSlice = createSlice({
       const existingItem = state.items.find(item => item.id === id);
 
       state.totalAmount--;
+      state.changed = true;
 
       if (existingItem.quantity === 1) {
         state.items = state.items.filter(item => item.id !== id);
@@ -55,52 +61,52 @@ const cartSlice = createSlice({
 
 // When using redux toolkit we CAN pass a function that returns another function as an action.  This is built into redux when using redux toolkit.
 
-export const sendCartData = cart => {
-  return async dispatch => {
-    dispatch(
-      uiActions.showNotification({
-        status: 'pending',
-        title: 'Sending...',
-        message: 'Sending cart data',
-      })
-    );
+// export const sendCartData = cart => {
+//   return async dispatch => {
+//     dispatch(
+//       uiActions.showNotification({
+//         status: 'pending',
+//         title: 'Sending...',
+//         message: 'Sending cart data',
+//       })
+//     );
 
-    const sendRequest = async () => {
-      const res = await fetch(
-        'https://react-redux-f738e-default-rtdb.firebaseio.com/cart.json',
-        {
-          method: 'PUT',
-          body: JSON.stringify(cart),
-          headers: {
-            'Content-type': 'application/json',
-          },
-        }
-      );
+//     const sendRequest = async () => {
+//       const res = await fetch(
+//         'https://react-redux-f738e-default-rtdb.firebaseio.com/cart.json',
+//         {
+//           method: 'PUT',
+//           body: JSON.stringify(cart),
+//           headers: {
+//             'Content-type': 'application/json',
+//           },
+//         }
+//       );
 
-      if (!res.ok) throw new Error('Sending cart data failed.');
-    };
+//       if (!res.ok) throw new Error('Sending cart data failed.');
+//     };
 
-    try {
-      await sendRequest();
+//     try {
+//       await sendRequest();
 
-      dispatch(
-        uiActions.showNotification({
-          status: 'success',
-          title: 'Success',
-          message: 'Sent cart data successfully',
-        })
-      );
-    } catch (err) {
-      dispatch(
-        uiActions.showNotification({
-          status: 'error',
-          tittle: 'Error.',
-          message: 'Sending cart data failed',
-        })
-      );
-    }
-  };
-};
+//       dispatch(
+//         uiActions.showNotification({
+//           status: 'success',
+//           title: 'Success',
+//           message: 'Sent cart data successfully',
+//         })
+//       );
+//     } catch (err) {
+//       dispatch(
+//         uiActions.showNotification({
+//           status: 'error',
+//           tittle: 'Error.',
+//           message: 'Sending cart data failed',
+//         })
+//       );
+//     }
+//   };
+// };
 
 export const cartActions = cartSlice.actions;
 

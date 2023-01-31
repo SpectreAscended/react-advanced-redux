@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Cart from './components/Cart/Cart';
 import Layout from './components/Layout/Layout';
 import Products from './components/Shop/Products';
 import Notification from './components/UI/Notification';
-import { sendCartData } from './store/cartSlice';
+import { sendCartData, fetchCartData } from './store/cartActions';
 
 let isInitial = true;
 
@@ -13,19 +13,34 @@ function App() {
   const cartOpen = useSelector(state => state.ui.cartOpen);
   const cart = useSelector(state => state.cart);
   const notification = useSelector(state => state.ui.notification);
+  const [showNotification, setShowNotification] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchCartData());
+  }, [dispatch]);
 
   useEffect(() => {
     if (isInitial) {
       isInitial = false;
       return;
     }
+    let timer;
+    if (cart.changed) {
+      dispatch(sendCartData(cart));
+      setShowNotification(true);
+      timer = setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
+    }
 
-    dispatch(sendCartData(cart));
+    return () => {
+      clearTimeout(timer);
+    };
   }, [cart, dispatch]);
 
   return (
     <>
-      {notification && (
+      {showNotification && (
         <Notification
           status={notification.status}
           title={notification.title}
